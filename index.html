@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SnapZip – Image Compressor</title>
+<style>
+:root{--bg:#0b0c0f;--ink:#e6eef7;--muted:#9aa6b2;--card:#0f1319;--edge:#212835;--hi:#9bd1ff;--hi2:#79c0ff;--accent:#2dd4bf;--ring:rgba(121,192,255,.35)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(120% 140% at 10% -10%,#0e1621,#0b0c0f);color:var(--ink);font:14px/1.45 system-ui,Segoe UI,Roboto,Inter,Arial}
+.w{max-width:980px;margin:40px auto;padding:0 16px}
+.h{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#1a2230,#0c1016);border:1px solid #1f2733;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.logo svg{width:20px;height:20px;opacity:.9}
+.title{margin:0;font-size:22px;letter-spacing:.2px}
+.a{color:var(--hi);text-decoration:none}
+.card{background:linear-gradient(180deg,#121722,#0c1118);border:1px solid var(--edge);border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,.38);padding:16px}
+.top{display:grid;grid-template-columns:1fr;gap:12px}
+.drop{display:grid;place-items:center;text-align:center;gap:10px;min-height:220px;border:1.5px dashed #2b3440;border-radius:14px;background:#0e1116;cursor:pointer;transition:transform .15s ease, outline-color .2s ease}
+.drop.drag{outline:2px solid var(--ring);transform:scale(1.01)}
+.drop .big{display:grid;place-items:center;width:60px;height:60px;border-radius:50%;background:linear-gradient(180deg,#1c2432,#121824);border:1px solid #222b38}
+.drop small{color:var(--muted)}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+label{color:var(--muted);display:flex;gap:6px;align-items:center}
+input[type=number],select{background:#0f141b;border:1px solid #253040;color:var(--ink);border-radius:10px;padding:9px 10px;min-width:110px}
+input[type=range]{width:170px}
+.btn{background:linear-gradient(180deg,var(--hi),var(--hi2));color:#0a0d12;border:0;border-radius:12px;font-weight:700;padding:10px 16px;cursor:pointer}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn.sec{background:#1b2330;color:#d5e7ff;border:1px solid #293447}
+.stats{margin-top:8px;color:var(--muted)}
+.grid{margin-top:14px;max-height:320px;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.item{display:flex;gap:10px;align-items:center;background:#0e1218;border:1px solid #232a35;border-radius:12px;padding:10px}
+.th{width:56px;height:56px;border-radius:10px;background:#0b0f14;overflow:hidden;flex:0 0 56px}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.meta{min-width:0}
+.meta b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.meta small{color:var(--muted)}
+.item .x{margin-left:auto}
+.prog{height:8px;background:#0e141b;border:1px solid #223046;border-radius:99px;overflow:hidden;display:none}
+.bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#60a5fa)}
+.footer{margin-top:14px;display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="h">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12a8 8 0 1 1 16 0c0 4.418-3.582 8-8 8-4.418 0-8-3.582-8-8Z" stroke="#79c0ff"/><path d="M8 12c0-2.209 1.791-4 4-4 1.657 0 3 1.343 3 3v5H9a3 3 0 0 1-3-3Z" fill="#79c0ff"/></svg></div>
+      <h1 class="title">SnapZip</h1>
+    </div>
+    <a class="a" href="https://github.com/Protonsss" target="_blank" rel="noopener">by Protonsss</a>
+  </div>
+  <div class="card">
+    <div class="top">
+      <div id="drop" class="drop">
+        <div class="big">📦</div>
+        <div>Drag images here or click</div>
+        <small>JPG/PNG/WebP/HEIC if supported</small>
+        <input id="file" type="file" accept="image/*" multiple style="display:none">
+      </div>
+      <div class="controls">
+        <label>Format
+          <select id="fmt">
+            <option value="image/webp">WebP</option>
+            <option value="image/jpeg">JPEG</option>
+            <option value="image/png">PNG</option>
+          </select>
+        </label>
+        <label>Quality <input id="q" type="range" min="0.4" max="1" step="0.05" value="0.85"><span id="qv">85%</span></label>
+        <label>Max W <input id="mw" type="number" value="1920" min="256" max="8000"></label>
+        <label>Max H <input id="mh" type="number" value="1920" min="256" max="8000"></label>
+        <button id="add" class="btn sec">Add Images</button>
+        <button id="go" class="btn" disabled>Download ZIP</button>
+      </div>
+      <div class="stats" id="stats">No files</div>
+      <div class="prog" id="prog"><div class="bar" id="bar"></div></div>
+    </div>
+    <div id="list" class="grid"></div>
+    <div class="footer">
+      <small style="color:var(--muted)">Local processing in your browser</small>
+      <div class="controls"><button id="clear" class="btn sec">Clear</button></div>
+    </div>
+  </div>
+</div>
+<script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script>
+const fi=document.getElementById('file');
+const drop=document.getElementById('drop');
+const list=document.getElementById('list');
+const go=document.getElementById('go');
+const addBtn=document.getElementById('add');
+const clr=document.getElementById('clear');
+const q=document.getElementById('q');
+const qv=document.getElementById('qv');
+const fmt=document.getElementById('fmt');
+const mw=document.getElementById('mw');
+const mh=document.getElementById('mh');
+const stats=document.getElementById('stats');
+const prog=document.getElementById('prog');
+const bar=document.getElementById('bar');
+let items=[];
+function ok(){go.disabled=items.length===0}
+function bytes(n){return n<1024? n+' B' : n<1048576? (n/1024).toFixed(1)+' KB' : (n/1048576).toFixed(1)+' MB'}
+function recalc(){const total=items.reduce((s,o)=>s+o.f.size,0);stats.textContent=items.length? `${items.length} file${items.length>1?'s':''} • ${bytes(total)}`:'No files'}
+function render(){
+  list.innerHTML=items.map((o,i)=>`<div class=\"item\"><div class=\"th\"><img src=\"${o.preview}\"></div><div class=\"meta\"><b title=\"${o.f.name}\">${o.f.name}</b><small>${o.dim||''} ${o.f.type||'image'} • ${bytes(o.f.size)}</small></div><button data-i=\"${i}\" class=\"btn sec x\">✕</button></div>`).join('');
+  list.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>{items.splice(+b.dataset.i,1);render();ok();recalc()});
+}
+function pick(){fi.click()}
+addBtn.onclick=pick;
+drop.addEventListener('click',pick);
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag')});
+drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));
+drop.addEventListener('drop',async e=>{e.preventDefault();drop.classList.remove('drag');await add(e.dataTransfer.files)});
+fi.onchange=async e=>add(e.target.files);
+async function add(fs){for(const f of fs){if(!f.type.startsWith('image'))continue;const p=await toDataURL(f);const dim=await getDims(p);items.push({f,preview:p,dim:`${dim.w}×${dim.h}`})}render();ok();recalc()}
+function toDataURL(b){return new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(b)})}
+function getDims(src){return new Promise(res=>{const img=new Image();img.onload=()=>res({w:img.naturalWidth,h:img.naturalHeight});img.src=src})}
+async function compress(f,type,qual,maxW,maxH){const img=new Image();img.src=await toDataURL(f);await img.decode();let w=img.width,h=img.height;const s=Math.min(1,maxW/w,maxH/h);if(s<1){w=Math.round(w*s);h=Math.round(h*s)}const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);return await new Promise(r=>c.toBlob(r,type,qual))}
+q.oninput=()=>{qv.textContent=Math.round(parseFloat(q.value)*100)+'%'}
+go.onclick=async()=>{
+  go.disabled=true;go.textContent='Working…';prog.style.display='block';bar.style.width='0%';
+  const zip=new JSZip();
+  const type=fmt.value;const qual=parseFloat(q.value);const maxW=parseInt(mw.value,10);const maxH=parseInt(mh.value,10);
+  for(let i=0;i<items.length;i++){
+    const f=items[i].f;const ext=type==='image/png'?'png':type==='image/jpeg'?'jpg':'webp';
+    const out=await compress(f,type,qual,maxW,maxH);const base=f.name.replace(/\.[^.]+$/,'');zip.file(`${base}.${ext}`,out);
+    const p=Math.round(((i+1)/items.length)*100);bar.style.width=p+'%';
+  }
+  const blob=await zip.generateAsync({type:'blob'});saveAs(blob,`snapzip_${Date.now()}.zip`);
+  go.textContent='Download ZIP';go.disabled=false;setTimeout(()=>{prog.style.display='none';bar.style.width='0%'},600);
+};
+clr.onclick=()=>{items=[];render();ok();recalc()};
+qv.textContent=Math.round(parseFloat(q.value)*100)+'%';recalc();
+</script>
+</body>
+</html>
