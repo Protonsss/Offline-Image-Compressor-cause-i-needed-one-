@@ -21,3 +21,5 @@ Drag & drop images → resize/convert (WebP / JPEG / PNG) → download a ZIP —
   ```bash
   python3 -m http.server 5500
   # visit http://localhost:5500
+
+Live demo here: https://protonsss.github.io/Offline-Image-Compressor-cause-i-needed-one-/
